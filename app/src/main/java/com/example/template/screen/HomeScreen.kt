@@ -2,7 +2,6 @@ package com.example.template.screen
 
 import android.graphics.drawable.PaintDrawable
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,95 +18,130 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.template.R
+import com.example.template.api.ApiService
+import com.example.template.api.Personagem
 import com.example.template.ui.theme.AndroidTemplateTheme
 import com.example.template.ui.theme.GryffindorRed
 import com.example.template.ui.theme.HufflepuffYellow
 import com.example.template.ui.theme.RavenclawBlue
 import com.example.template.ui.theme.SlytherinGreen
+import retrofit2.Retrofit
 
 
-enum class Casa(val casa: String){
-    GRIFINORIA(casa = "Grifinória"),
-    SONSERIA(casa = "Sonserina"),
-    LUFALUFA(casa = "Lufa Lufa"),
-    CORNVINAL(casa = "Cornvinal");
+enum class Casa(val casa: String) {
+    GRIFINORIA("Grifinória"),
+    SONSERINA("Sonserina"),
+    LUFALUFA("Lufa Lufa"),
+    CORVINAL("Corvinal");
 
     override fun toString(): String = casa
-    
 }
-/**
- * Única tela do template. Comece a construir seu app a partir daqui.
- */
+
+
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
+
+    var rodada by remember { mutableStateOf( 0 ) }
+    var personagem by remember {
+        mutableStateOf<Personagem?>( null )
+    }
+    val rodadaMaximo = 5
+
+    LaunchedEffect(rodada) {
+        personagem = try {
+            ApiService.api.getRandomPersonagem()
+        } catch (e: Exception) {
+            null
+        }
+        println("Personagem: ${personagem}")
+    }
+
+
     Scaffold(
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
+
         Column(
-           modifier = Modifier
-               .fillMaxSize()
-               .padding(paddingValues = innerPadding)
-               .padding(all = 24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
-            ){
-
+            ) {
                 Text(
-                    text = "Hogwarts Quiz"
+                    text = "Hogwartz Quiz"
                 )
                 Text(
                     text = "0/5"
                 )
             }
-            Spacer(modifier = Modifier.height(60.dp))
-            Image(
-                painter = painterResource(R.drawable.image),
-                contentDescription = "Imagem do Harry Potter"
+            Spacer(modifier = Modifier.height(10.dp))
+            if(
+                personagem?.image !== null
+            ){
+                AsyncImage(
+                    modifier = Modifier.size(130.dp),
+                    model = personagem?.image,
+                    contentDescription = "imagem de personagem",
+                    contentScale = ContentScale.Fit
+                )
+                println("If: ${personagem}")
+            }else{
+                println("Else: ${personagem}")
+            }
 
-            )
             Spacer(modifier = Modifier.height(80.dp))
             Text(
-                text = "Harry Potter",
+                text = personagem?.fullName ?: "Carregando..",
                 fontSize = 32.sp
+
             )
             Text(
                 text = "Escolha sua casa"
             )
-            Spacer(modifier = Modifier.height(60.dp))
-            for (value in Casa.entries){
-                CasaButton(value)
+            Spacer(modifier = Modifier.height(10.dp))
+            for (value in Casa.entries) {
+                CasaBotao(value)
             }
-
         }
     }
 }
 
 @Composable
-fun CasaButton(casa: Casa){
+fun CasaBotao(casa: Casa) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             contentColor = Color.White,
             containerColor = when(casa) {
                 Casa.GRIFINORIA -> GryffindorRed
-                Casa.SONSERIA -> SlytherinGreen
+                Casa.SONSERINA -> SlytherinGreen
                 Casa.LUFALUFA -> HufflepuffYellow
-                Casa.CORNVINAL -> RavenclawBlue
+                Casa.CORVINAL -> RavenclawBlue
             }
         ),
         onClick = {}

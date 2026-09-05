@@ -12,22 +12,25 @@ import com.example.template.ui.theme.AndroidTemplateTheme
 @Composable
 fun Resultado(
     modifier: Modifier = Modifier
-){
+) {
     Scaffold(
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues = innerPadding)
-        ) { }
+                .padding(innerPadding)
+        ) {
+
+        }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
     AndroidTemplateTheme {
-        HomeScreen()
+        Resultado()
     }
 }
